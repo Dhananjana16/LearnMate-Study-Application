@@ -11,6 +11,9 @@ import { buildPdfHtml } from '../pdfHtml';
 import { getNotes } from '../notesStore';
 import VoicePicker from '../VoicePicker';
 import { cleanForSpeech, speakOptions } from '../speechText';
+import { getApiKey } from '../aiKeyStore';
+import { generateStudySet } from '../ai';
+import { getStudySet, saveStudySet } from '../studyStore';
 import { getVoice, saveVoice } from '../ttsStore';
 import { getHighlights, addHighlight, deleteHighlight, deleteHighlights } from '../highlightStore';
 
@@ -28,7 +31,7 @@ const SIZES = [
   { label: 'Thick', px: 18 },
 ];
 
-const PdfView = forwardRef(function PdfView({ file, notes, highlights, highlightMode, highlightColor, highlightSize, eraser, onAddNote, onOpenNote, onPage, onAddHighlight, onOpenHighlight, onEraseHighlights, onPageText }, outerRef) {
+const PdfView = forwardRef(function PdfView({ file, notes, highlights, highlightMode, highlightColor, highlightSize, eraser, onAddNote, onOpenNote, onPage, onAddHighlight, onOpenHighlight, onEraseHighlights, onPageText, onAllText }, outerRef) {
   const [html, setHtml] = useState(null);
   const [error, setError] = useState(null);
   const [ready, setReady] = useState(false);
@@ -131,6 +134,7 @@ const PdfView = forwardRef(function PdfView({ file, notes, highlights, highlight
           else if (m.type === 'openHighlight') onOpenHighlight(m.id);
           else if (m.type === 'eraseHighlights') onEraseHighlights(m.ids);
           else if (m.type === 'pageText') onPageText(m);
+          else if (m.type === 'allText') onAllText(m);
         } catch (err) {}
       }}
     />
@@ -298,6 +302,61 @@ export default function ViewerScreen({ route, navigation }) {
       { text: 'Remove', style: 'destructive', onPress: async () => setHighlights(await deleteHighlight(file.id, id)) },
     ]);
   };
+  // ----- AI flashcards and MCQ made from this file -----
+  const [generating, setGenerating] = useState(false);
+  const studyWait = useRef(false);
+
+  const openStudy = async () => {
+    if (generating) return;
+    const existing = await getStudySet(file.id);
+    if (existing) {
+      navigation.navigate('Study', { file });
+      return;
+    }
+    const key = await getApiKey();
+    if (!key) {
+      Alert.alert('AI key needed', 'Add your AI key in Settings first.', [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Open Settings', onPress: () => navigation.navigate('Settings') },
+      ]);
+      return;
+    }
+    setGenerating(true);
+    studyWait.current = true;
+    if (pdfRef.current) pdfRef.current.run('window.getAllText(20000)');
+  };
+
+  const onAllText = async (m) => {
+    if (!studyWait.current) return;
+    if (m.loading) {
+      setTimeout(() => {
+        if (studyWait.current && pdfRef.current) pdfRef.current.run('window.getAllText(20000)');
+      }, 800);
+      return;
+    }
+    studyWait.current = false;
+    const text = (m.text || '')
+      .replace(/-\n/g, '')
+      .replace(/[ \t]+/g, ' ')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+    if (text.length < 200) {
+      setGenerating(false);
+      Alert.alert('Not enough text', 'This PDF has very little readable text. Scanned pages and pictures cannot be used yet.');
+      return;
+    }
+    try {
+      const key = await getApiKey();
+      const set = await generateStudySet(text, key);
+      await saveStudySet(file.id, set);
+      setGenerating(false);
+      navigation.navigate('Study', { file });
+    } catch (e) {
+      setGenerating(false);
+      Alert.alert('Could not make questions', String(e.message || e));
+    }
+  };
+
   const addNote = (page, x, y) => navigation.navigate('NoteEditor', { file, isPdf, page, x, y });
   const openNote = (noteId) => navigation.navigate('NoteEditor', { file, isPdf, noteId });
 
@@ -370,6 +429,7 @@ export default function ViewerScreen({ route, navigation }) {
         <PdfView
           ref={pdfRef}
           onPageText={onPageText}
+          onAllText={onAllText}
           file={file}
           notes={notes}
           highlights={highlights}
@@ -385,9 +445,14 @@ export default function ViewerScreen({ route, navigation }) {
           onPage={(p) => { pageRef.current = p; }}
         />
         {!listening ? (
-          <TouchableOpacity style={s.fab} onPress={startListening}>
-            <Text style={s.fabText}>🔊</Text>
-          </TouchableOpacity>
+          <>
+            <TouchableOpacity style={[s.fab, s.fabStudy]} onPress={openStudy}>
+              <Text style={s.fabText}>🧠</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={s.fab} onPress={startListening}>
+              <Text style={s.fabText}>🔊</Text>
+            </TouchableOpacity>
+          </>
         ) : (
           <View style={s.listenBar}>
             <Text style={s.listenText}>🔊 {readPage}{totalPages ? `/${totalPages}` : ''}</Text>
@@ -404,6 +469,13 @@ export default function ViewerScreen({ route, navigation }) {
         )}
         </View>
       )}
+      {generating && (
+        <View style={s.overlay}>
+          <ActivityIndicator size="large" color="#fff" />
+          <Text style={s.overlayText}>Reading your notes and writing questions...</Text>
+          <Text style={s.overlaySub}>This takes about 10 to 30 seconds.</Text>
+        </View>
+      )}
       <VoicePicker visible={pickerOpen} onClose={() => setPickerOpen(false)} selected={voiceId} onPick={pickVoice} />
     </View>
   );
@@ -412,7 +484,11 @@ export default function ViewerScreen({ route, navigation }) {
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
   fab: { position: 'absolute', right: 16, bottom: 24, width: 56, height: 56, borderRadius: 28, backgroundColor: '#4f46e5', alignItems: 'center', justifyContent: 'center', elevation: 6 },
+  fabStudy: { bottom: 92, backgroundColor: '#0f766e' },
   fabText: { fontSize: 24 },
+  overlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(17,24,39,0.85)', alignItems: 'center', justifyContent: 'center', padding: 24 },
+  overlayText: { color: '#fff', fontSize: 16, fontWeight: 'bold', marginTop: 16, textAlign: 'center' },
+  overlaySub: { color: '#d1d5db', marginTop: 6, textAlign: 'center' },
   listenBar: { position: 'absolute', left: 12, right: 12, bottom: 20, backgroundColor: '#111827', borderRadius: 12, paddingVertical: 10, paddingHorizontal: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', elevation: 6 },
   listenText: { color: '#fff', fontWeight: 'bold', flex: 1 },
   rateButton: { backgroundColor: '#374151', paddingVertical: 6, paddingHorizontal: 12, borderRadius: 6, marginRight: 8 },

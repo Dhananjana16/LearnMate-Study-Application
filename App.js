@@ -9,6 +9,7 @@ import ViewerScreen from './src/screens/ViewerScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
 import NotesScreen from './src/screens/NotesScreen';
 import NoteEditorScreen from './src/screens/NoteEditorScreen';
+import StudyScreen from './src/screens/StudyScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -33,6 +34,7 @@ export default function App() {
         <Stack.Screen name="Viewer" component={ViewerScreen} options={({ route }) => ({ title: route.params.file.name })} />
         <Stack.Screen name="Notes" component={NotesScreen} options={{ title: 'Notes' }} />
         <Stack.Screen name="NoteEditor" component={NoteEditorScreen} options={{ title: 'Note' }} />
+        <Stack.Screen name="Study" component={StudyScreen} options={{ title: 'Study' }} />
         <Stack.Screen name="Settings" component={SettingsScreen} options={{ title: 'Settings' }} />
       </Stack.Navigator>
     </NavigationContainer>

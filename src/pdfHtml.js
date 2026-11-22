@@ -297,6 +297,41 @@ export function buildPdfHtml(base64) {
       post({ type: 'pageText', page: n, text: '', pages: pdf.numPages });
     });
   };
+  // Text of the whole document (up to maxChars), used to make questions.
+  function extractText(items) {
+    var out = '';
+    for (var i = 0; i < items.length; i++) {
+      var it = items[i];
+      out += it.str;
+      var nx = items[i + 1];
+      if (!nx) break;
+      if (it.hasEOL) { out += '\\n'; continue; }
+      if (!it.str || !nx.str || !it.transform || !nx.transform) continue;
+      var h = it.height || 10;
+      if (Math.abs(nx.transform[5] - it.transform[5]) > h * 0.5) { out += '\\n'; continue; }
+      var gap = nx.transform[4] - (it.transform[4] + it.width);
+      if (gap > h * 0.15 && !/\\s$/.test(it.str) && !/^\\s/.test(nx.str)) out += ' ';
+    }
+    return out;
+  }
+  window.getAllText = function (maxChars) {
+    var pdf = window.__pdf;
+    if (!pdf) { post({ type: 'allText', text: '', loading: true }); return; }
+    var out = '';
+    var n = 1;
+    function next() {
+      if (n > pdf.numPages || out.length >= maxChars) {
+        post({ type: 'allText', text: out.slice(0, maxChars), pages: pdf.numPages });
+        return;
+      }
+      pdf.getPage(n).then(function (p) { return p.getTextContent(); }).then(function (tc) {
+        out += extractText(tc.items) + '\\n\\n';
+        n++;
+        next();
+      }).catch(function () { n++; next(); });
+    }
+    next();
+  };
   window.goToPage = function (n) {
     var el = document.getElementById('pg' + n);
     if (el && el.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
