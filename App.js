@@ -1,8 +1,7 @@
 import React from 'react';
-import { Text, TouchableOpacity } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import HomeScreen from './src/screens/HomeScreen';
+import MainTabs from './src/screens/MainTabs';
 import SubjectScreen from './src/screens/SubjectScreen';
 import FolderScreen from './src/screens/FolderScreen';
 import ViewerScreen from './src/screens/ViewerScreen';
@@ -10,25 +9,23 @@ import SettingsScreen from './src/screens/SettingsScreen';
 import NotesScreen from './src/screens/NotesScreen';
 import NoteEditorScreen from './src/screens/NoteEditorScreen';
 import StudyScreen from './src/screens/StudyScreen';
+import { colors } from './src/theme';
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator>
-        <Stack.Screen
-          name="Home"
-          component={HomeScreen}
-          options={({ navigation }) => ({
-            title: 'Learn Mate',
-            headerRight: () => (
-              <TouchableOpacity onPress={() => navigation.navigate('Settings')}>
-                <Text style={{ fontSize: 22 }}>⚙️</Text>
-              </TouchableOpacity>
-            ),
-          })}
-        />
+      <Stack.Navigator
+        screenOptions={{
+          headerStyle: { backgroundColor: colors.bg },
+          headerShadowVisible: false,
+          headerTintColor: colors.primary,
+          headerTitleStyle: { fontWeight: '700', color: colors.text },
+          contentStyle: { backgroundColor: colors.bg },
+        }}
+      >
+        <Stack.Screen name="Main" component={MainTabs} options={{ headerShown: false }} />
         <Stack.Screen name="Subject" component={SubjectScreen} options={({ route }) => ({ title: route.params.subject.name })} />
         <Stack.Screen name="Folder" component={FolderScreen} options={({ route }) => ({ title: route.params.folder })} />
         <Stack.Screen name="Viewer" component={ViewerScreen} options={({ route }) => ({ title: route.params.file.name })} />

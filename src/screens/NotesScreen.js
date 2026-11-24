@@ -2,6 +2,7 @@ import React, { useCallback, useState } from 'react';
 import { View, Text, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { getNotes } from '../notesStore';
+import { colors, shadow } from '../theme';
 
 export default function NotesScreen({ route, navigation }) {
   const { file, isPdf, currentPage } = route.params;
@@ -43,10 +44,10 @@ export default function NotesScreen({ route, navigation }) {
 }
 
 const s = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: '#f5f5f5' },
-  add: { backgroundColor: '#4f46e5', padding: 14, borderRadius: 8, marginBottom: 16, alignItems: 'center' },
+  container: { flex: 1, padding: 16, backgroundColor: colors.bg },
+  add: { backgroundColor: colors.primary, padding: 14, borderRadius: 14, marginBottom: 16, alignItems: 'center' },
   addText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
-  card: { backgroundColor: '#fde68a', padding: 14, borderRadius: 6, marginBottom: 10 },
+  card: { ...shadow, backgroundColor: '#FDE68A', padding: 14, borderRadius: 14, marginBottom: 10 },
   page: { fontWeight: 'bold', marginBottom: 4 },
   text: { fontSize: 15 },
   empty: { textAlign: 'center', marginTop: 40, color: '#888' },

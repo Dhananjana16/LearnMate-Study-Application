@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import * as Speech from 'expo-speech';
+import { colors } from './theme';
 
 const SAMPLE = 'This is how Learn Mate will read your notes to you.';
 
@@ -73,13 +74,13 @@ export default function VoicePicker({ visible, onClose, selected, onPick }) {
 }
 
 const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f5f5', padding: 16, paddingTop: 40 },
+  container: { flex: 1, backgroundColor: colors.bg, padding: 16, paddingTop: 40 },
   title: { fontSize: 22, fontWeight: 'bold', marginBottom: 8 },
   hint: { color: '#666', marginBottom: 12 },
-  row: { backgroundColor: '#fff', padding: 14, borderRadius: 8, marginBottom: 8, borderWidth: 2, borderColor: 'transparent' },
-  rowOn: { borderColor: '#4f46e5' },
+  row: { backgroundColor: '#fff', padding: 15, borderRadius: 16, marginBottom: 8, borderWidth: 2, borderColor: 'transparent' },
+  rowOn: { borderColor: colors.primary },
   name: { fontSize: 16 },
   lang: { color: '#888', marginTop: 2 },
-  done: { backgroundColor: '#4f46e5', padding: 14, borderRadius: 8, alignItems: 'center', marginTop: 8 },
+  done: { backgroundColor: colors.primary, padding: 14, borderRadius: 14, alignItems: 'center', marginTop: 8 },
   doneText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
 });

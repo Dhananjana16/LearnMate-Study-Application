@@ -8,6 +8,8 @@ import { useFocusEffect } from '@react-navigation/native';
 import useOpenTimer from '../hooks/useOpenTimer';
 import { formatTime } from '../timeStore';
 import { buildPdfHtml } from '../pdfHtml';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { colors, shadow } from '../theme';
 import { getNotes } from '../notesStore';
 import VoicePicker from '../VoicePicker';
 import { cleanForSpeech, speakOptions } from '../speechText';
@@ -363,7 +365,10 @@ export default function ViewerScreen({ route, navigation }) {
   return (
     <View style={s.container}>
       <View style={s.timerBar}>
-        <Text style={s.timerText}>⏱ {formatTime(seconds)}</Text>
+        <View style={s.timerPill}>
+          <Ionicons name="time-outline" size={16} color={colors.primary} />
+          <Text style={s.timerText}>{formatTime(seconds)}</Text>
+        </View>
         <View style={s.buttons}>
         {isPdf && (
           <>
@@ -371,13 +376,14 @@ export default function ViewerScreen({ route, navigation }) {
               style={[s.hlButton, tool === 'highlight' && s.hlButtonOn]}
               onPress={() => setTool(tool === 'highlight' ? null : 'highlight')}
             >
-              <Text style={s.hlButtonText}>🖍</Text>
+              <MaterialCommunityIcons name="marker" size={22} color={tool === 'highlight' ? '#7A5A00' : colors.text} />
             </TouchableOpacity>
             <TouchableOpacity
               style={[s.hlButton, tool === 'erase' && s.eraseButtonOn]}
               onPress={() => setTool(tool === 'erase' ? null : 'erase')}
             >
-              <Text style={s.hlButtonText}>🧽 Erase</Text>
+              <MaterialCommunityIcons name="eraser" size={22} color={tool === 'erase' ? '#9B1C1C' : colors.text} />
+              <Text style={[s.hlButtonText, tool === 'erase' && { color: '#9B1C1C' }]}>Erase</Text>
             </TouchableOpacity>
           </>
         )}
@@ -385,13 +391,14 @@ export default function ViewerScreen({ route, navigation }) {
           style={s.notesButton}
           onPress={() => navigation.navigate('Notes', { file, isPdf, currentPage: pageRef.current })}
         >
-          <Text style={s.notesButtonText}>📝 Notes ({notes.length})</Text>
+          <MaterialCommunityIcons name="note-text-outline" size={18} color="#fff" />
+          <Text style={s.notesButtonText}>Notes ({notes.length})</Text>
         </TouchableOpacity>
         </View>
       </View>
       {tool === 'highlight' && (
         <View style={s.hlBanner}>
-          <Text style={s.hlBannerText}>Swipe over text to highlight. Tap 🖍 again to scroll.</Text>
+          <Text style={s.hlBannerText}>Swipe over text to highlight. Tap the highlighter again to scroll.</Text>
           <View style={s.colorRow}>
             {COLORS.map((c) => (
               <TouchableOpacity
@@ -412,14 +419,15 @@ export default function ViewerScreen({ route, navigation }) {
               </TouchableOpacity>
             ))}
             <TouchableOpacity style={s.undo} onPress={undoHighlight}>
-              <Text style={s.undoText}>↩ Undo</Text>
+              <Ionicons name="arrow-undo" size={16} color={colors.text} />
+              <Text style={s.undoText}>Undo</Text>
             </TouchableOpacity>
           </View>
         </View>
       )}
       {tool === 'erase' && (
         <View style={s.eraseBanner}>
-          <Text style={s.eraseBannerText}>Eraser on: swipe over a highlight to remove it. Tap 🧽 again to scroll.</Text>
+          <Text style={s.eraseBannerText}>Eraser on: swipe over a highlight to remove it. Tap Erase again to scroll.</Text>
         </View>
       )}
       {isImage ? (
@@ -447,23 +455,25 @@ export default function ViewerScreen({ route, navigation }) {
         {!listening ? (
           <>
             <TouchableOpacity style={[s.fab, s.fabStudy]} onPress={openStudy}>
-              <Text style={s.fabText}>🧠</Text>
+              <MaterialCommunityIcons name="brain" size={28} color="#fff" />
             </TouchableOpacity>
             <TouchableOpacity style={s.fab} onPress={startListening}>
-              <Text style={s.fabText}>🔊</Text>
+              <Ionicons name="volume-high" size={26} color="#fff" />
             </TouchableOpacity>
           </>
         ) : (
           <View style={s.listenBar}>
-            <Text style={s.listenText}>🔊 {readPage}{totalPages ? `/${totalPages}` : ''}</Text>
+            <Ionicons name="volume-high" size={20} color="#fff" style={{ marginRight: 8 }} />
+            <Text style={s.listenText}>Page {readPage}{totalPages ? ` of ${totalPages}` : ''}</Text>
             <TouchableOpacity style={s.rateButton} onPress={() => setPickerOpen(true)}>
-              <Text style={s.rateText}>🗣 Voice</Text>
+              <Text style={s.rateText}>Voice</Text>
             </TouchableOpacity>
             <TouchableOpacity style={s.rateButton} onPress={changeRate}>
               <Text style={s.rateText}>{rate}x</Text>
             </TouchableOpacity>
             <TouchableOpacity style={s.stopButton} onPress={stopListening}>
-              <Text style={s.stopText}>⏹ Stop</Text>
+              <Ionicons name="stop" size={14} color="#fff" />
+              <Text style={s.stopText}> Stop</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -482,45 +492,46 @@ export default function ViewerScreen({ route, navigation }) {
 }
 
 const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
-  fab: { position: 'absolute', right: 16, bottom: 24, width: 56, height: 56, borderRadius: 28, backgroundColor: '#4f46e5', alignItems: 'center', justifyContent: 'center', elevation: 6 },
-  fabStudy: { bottom: 92, backgroundColor: '#0f766e' },
+  container: { flex: 1, backgroundColor: colors.bg },
+  fab: { position: 'absolute', right: 16, bottom: 24, width: 58, height: 58, borderRadius: 29, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center', elevation: 6, shadowColor: '#2E3A8C', shadowOpacity: 0.25, shadowRadius: 8, shadowOffset: { width: 0, height: 4 } },
+  fabStudy: { bottom: 94, backgroundColor: '#6B52D6' },
   fabText: { fontSize: 24 },
-  overlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(17,24,39,0.85)', alignItems: 'center', justifyContent: 'center', padding: 24 },
-  overlayText: { color: '#fff', fontSize: 16, fontWeight: 'bold', marginTop: 16, textAlign: 'center' },
-  overlaySub: { color: '#d1d5db', marginTop: 6, textAlign: 'center' },
-  listenBar: { position: 'absolute', left: 12, right: 12, bottom: 20, backgroundColor: '#111827', borderRadius: 12, paddingVertical: 10, paddingHorizontal: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', elevation: 6 },
-  listenText: { color: '#fff', fontWeight: 'bold', flex: 1 },
-  rateButton: { backgroundColor: '#374151', paddingVertical: 6, paddingHorizontal: 12, borderRadius: 6, marginRight: 8 },
-  rateText: { color: '#fff', fontWeight: 'bold' },
-  stopButton: { backgroundColor: '#dc2626', paddingVertical: 6, paddingHorizontal: 12, borderRadius: 6 },
-  stopText: { color: '#fff', fontWeight: 'bold' },
-  timerBar: { backgroundColor: '#eef2ff', paddingVertical: 8, paddingHorizontal: 16, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  timerText: { color: '#4f46e5', fontWeight: 'bold' },
+  overlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(31,35,64,0.88)', alignItems: 'center', justifyContent: 'center', padding: 24 },
+  overlayText: { color: '#fff', fontSize: 17, fontWeight: '800', marginTop: 16, textAlign: 'center' },
+  overlaySub: { color: '#C9CCE3', marginTop: 6, textAlign: 'center' },
+  listenBar: { position: 'absolute', left: 12, right: 12, bottom: 20, backgroundColor: colors.text, borderRadius: 18, paddingVertical: 10, paddingHorizontal: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', elevation: 8 },
+  listenText: { color: '#fff', fontWeight: '800', flex: 1 },
+  rateButton: { backgroundColor: 'rgba(255,255,255,0.15)', paddingVertical: 7, paddingHorizontal: 12, borderRadius: 10, marginRight: 8 },
+  rateText: { color: '#fff', fontWeight: '800' },
+  stopButton: { backgroundColor: colors.danger, paddingVertical: 7, paddingHorizontal: 12, borderRadius: 10, flexDirection: 'row', alignItems: 'center' },
+  stopText: { color: '#fff', fontWeight: '800' },
+  timerBar: { backgroundColor: '#fff', paddingVertical: 10, paddingHorizontal: 14, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderBottomLeftRadius: 20, borderBottomRightRadius: 20, ...shadow },
+  timerPill: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#E3EDFF', paddingVertical: 7, paddingHorizontal: 12, borderRadius: 14 },
+  timerText: { color: colors.primary, fontWeight: '800', marginLeft: 6 },
   buttons: { flexDirection: 'row', alignItems: 'center' },
-  hlButton: { backgroundColor: '#e5e7eb', paddingVertical: 6, paddingHorizontal: 10, borderRadius: 6, marginRight: 6 },
-  hlButtonOn: { backgroundColor: '#fde047' },
-  eraseButtonOn: { backgroundColor: '#fca5a5' },
-  eraseBanner: { backgroundColor: '#fee2e2', paddingVertical: 8, paddingHorizontal: 12, alignItems: 'center' },
-  eraseBannerText: { color: '#991b1b', fontSize: 13, textAlign: 'center' },
-  hlButtonText: { fontSize: 15, fontWeight: 'bold' },
-  hlBanner: { backgroundColor: '#fef9c3', paddingVertical: 6, paddingHorizontal: 12, alignItems: 'center' },
-  colorRow: { flexDirection: 'row', alignItems: 'center', marginTop: 6 },
-  dot: { width: 30, height: 30, borderRadius: 15, marginHorizontal: 6, borderWidth: 2, borderColor: 'transparent' },
-  dotOn: { borderColor: '#111827' },
-  chip: { paddingVertical: 6, paddingHorizontal: 12, marginHorizontal: 4, backgroundColor: '#fff', borderRadius: 6, borderWidth: 1, borderColor: '#d1d5db' },
-  chipOn: { backgroundColor: '#111827', borderColor: '#111827' },
-  chipText: { color: '#374151', fontWeight: 'bold' },
+  hlButton: { backgroundColor: colors.bg, paddingVertical: 8, paddingHorizontal: 11, borderRadius: 12, marginRight: 8, flexDirection: 'row', alignItems: 'center' },
+  hlButtonOn: { backgroundColor: '#FDE68A' },
+  eraseButtonOn: { backgroundColor: '#FECACA' },
+  eraseBanner: { backgroundColor: '#FFE9EA', marginHorizontal: 12, marginTop: 10, borderRadius: 14, paddingVertical: 9, paddingHorizontal: 12, alignItems: 'center' },
+  eraseBannerText: { color: '#9B1C1C', fontSize: 13, textAlign: 'center' },
+  hlButtonText: { fontSize: 14, fontWeight: '800', color: colors.text, marginLeft: 6 },
+  hlBanner: { backgroundColor: '#fff', marginHorizontal: 12, marginTop: 10, borderRadius: 18, paddingVertical: 10, paddingHorizontal: 12, alignItems: 'center', ...shadow },
+  colorRow: { flexDirection: 'row', alignItems: 'center', marginTop: 8 },
+  dot: { width: 30, height: 30, borderRadius: 15, marginHorizontal: 6, borderWidth: 3, borderColor: 'transparent' },
+  dotOn: { borderColor: colors.text },
+  chip: { paddingVertical: 7, paddingHorizontal: 14, marginHorizontal: 4, backgroundColor: colors.bg, borderRadius: 12 },
+  chipOn: { backgroundColor: colors.primary },
+  chipText: { color: colors.text, fontWeight: '700' },
   chipTextOn: { color: '#fff' },
-  undo: { marginLeft: 14, paddingVertical: 6, paddingHorizontal: 12, backgroundColor: '#fff', borderRadius: 6, borderWidth: 1, borderColor: '#d1d5db' },
-  undoText: { fontWeight: 'bold', color: '#374151' },
-  hlBannerText: { color: '#854d0e', fontSize: 13 },
-  notesButton: { backgroundColor: '#4f46e5', paddingVertical: 6, paddingHorizontal: 12, borderRadius: 6 },
-  notesButtonText: { color: '#fff', fontWeight: 'bold' },
+  undo: { marginLeft: 12, paddingVertical: 7, paddingHorizontal: 12, backgroundColor: colors.bg, borderRadius: 12, flexDirection: 'row', alignItems: 'center' },
+  undoText: { fontWeight: '700', color: colors.text, marginLeft: 4 },
+  hlBannerText: { color: colors.sub, fontSize: 13 },
+  notesButton: { backgroundColor: colors.primary, paddingVertical: 8, paddingHorizontal: 13, borderRadius: 12, flexDirection: 'row', alignItems: 'center' },
+  notesButtonText: { color: '#fff', fontWeight: '800', marginLeft: 6 },
   image: { flex: 1, width: '100%' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
   name: { fontSize: 16, marginVertical: 12, textAlign: 'center' },
-  button: { backgroundColor: '#4f46e5', paddingVertical: 12, paddingHorizontal: 28, borderRadius: 8, marginTop: 12 },
+  button: { backgroundColor: colors.primary, paddingVertical: 12, paddingHorizontal: 28, borderRadius: 14, marginTop: 12 },
   buttonText: { color: '#fff', fontWeight: 'bold' },
   note: { color: '#888', marginTop: 12, textAlign: 'center' },
 });

@@ -4,6 +4,7 @@ import { ScrollView, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from
 import { getVoice } from '../ttsStore';
 import { cleanForSpeech, speakOptions } from '../speechText';
 import { getNotes, upsertNote, deleteNote, defaultPosition } from '../notesStore';
+import { colors, shadow } from '../theme';
 
 export default function NoteEditorScreen({ route, navigation }) {
   const { file, isPdf, noteId, page, x, y } = route.params;
@@ -114,14 +115,14 @@ export default function NoteEditorScreen({ route, navigation }) {
 }
 
 const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fffbea' },
+  container: { flex: 1, backgroundColor: colors.bg },
   label: { fontWeight: 'bold', marginBottom: 6, marginTop: 8 },
-  pageInput: { backgroundColor: '#fff', borderRadius: 8, borderWidth: 1, borderColor: '#ddd', padding: 10, width: 100, fontSize: 16 },
-  input: { backgroundColor: '#fff', borderRadius: 8, borderWidth: 1, borderColor: '#ddd', padding: 10, minHeight: 220, fontSize: 16 },
-  listen: { padding: 12, borderRadius: 8, marginTop: 12, alignItems: 'center', backgroundColor: '#e0e7ff' },
-  listenText: { color: '#4338ca', fontWeight: 'bold' },
-  save: { backgroundColor: '#4f46e5', padding: 14, borderRadius: 8, marginTop: 16, alignItems: 'center' },
+  pageInput: { backgroundColor: '#fff', borderRadius: 14, borderWidth: 1, borderColor: '#ddd', padding: 10, width: 100, fontSize: 16 },
+  input: { backgroundColor: '#fff', borderRadius: 14, borderWidth: 1, borderColor: '#ddd', padding: 10, minHeight: 220, fontSize: 16 },
+  listen: { padding: 12, borderRadius: 14, marginTop: 12, alignItems: 'center', backgroundColor: '#E3EDFF' },
+  listenText: { color: colors.primary, fontWeight: 'bold' },
+  save: { backgroundColor: colors.primary, padding: 14, borderRadius: 14, marginTop: 16, alignItems: 'center' },
   saveText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
-  delete: { padding: 14, borderRadius: 8, marginTop: 10, alignItems: 'center', borderWidth: 1, borderColor: '#dc2626' },
-  deleteText: { color: '#dc2626', fontWeight: 'bold' },
+  delete: { padding: 14, borderRadius: 14, marginTop: 10, alignItems: 'center', borderWidth: 1, borderColor: colors.danger },
+  deleteText: { color: colors.danger, fontWeight: 'bold' },
 });

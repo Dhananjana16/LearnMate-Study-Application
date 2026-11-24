@@ -2,6 +2,7 @@ import React, { useCallback, useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Alert } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { getStudySet, deleteStudySet } from '../studyStore';
+import { colors, shadow } from '../theme';
 
 function Flashcards({ cards }) {
   const [i, setI] = useState(0);
@@ -143,33 +144,33 @@ export default function StudyScreen({ route, navigation }) {
 }
 
 const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f5f5' },
+  container: { flex: 1, backgroundColor: colors.bg },
   empty: { textAlign: 'center', marginTop: 40, color: '#888' },
-  tabs: { flexDirection: 'row', backgroundColor: '#e5e7eb', borderRadius: 8, padding: 4, marginBottom: 16 },
-  tab: { flex: 1, paddingVertical: 10, borderRadius: 6, alignItems: 'center' },
-  tabOn: { backgroundColor: '#4f46e5' },
+  tabs: { flexDirection: 'row', backgroundColor: '#E8E9F3', borderRadius: 18, padding: 4, marginBottom: 16 },
+  tab: { flex: 1, paddingVertical: 10, borderRadius: 14, alignItems: 'center' },
+  tabOn: { backgroundColor: colors.primary },
   tabText: { fontWeight: 'bold', color: '#374151' },
   tabTextOn: { color: '#fff' },
   counter: { color: '#666', marginBottom: 10, textAlign: 'center' },
-  card: { backgroundColor: '#fff', borderRadius: 12, padding: 24, minHeight: 240, justifyContent: 'center', elevation: 3 },
-  cardBack: { backgroundColor: '#eef2ff' },
-  cardLabel: { color: '#4f46e5', fontWeight: 'bold', marginBottom: 12, fontSize: 12 },
+  card: { ...shadow, backgroundColor: '#fff', borderRadius: 24, padding: 24, minHeight: 260, justifyContent: 'center' },
+  cardBack: { backgroundColor: '#E3EDFF' },
+  cardLabel: { color: colors.primary, fontWeight: 'bold', marginBottom: 12, fontSize: 12 },
   cardText: { fontSize: 20, lineHeight: 28 },
   tapHint: { color: '#9ca3af', marginTop: 16, fontSize: 12 },
   navRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 16 },
-  navButton: { backgroundColor: '#fff', paddingVertical: 12, paddingHorizontal: 24, borderRadius: 8, borderWidth: 1, borderColor: '#d1d5db' },
+  navButton: { backgroundColor: '#fff', paddingVertical: 12, paddingHorizontal: 24, borderRadius: 14, ...shadow },
   navText: { fontWeight: 'bold', color: '#374151' },
   question: { fontSize: 18, fontWeight: 'bold', marginBottom: 14, lineHeight: 26 },
-  option: { backgroundColor: '#fff', padding: 14, borderRadius: 8, marginBottom: 10, borderWidth: 2, borderColor: 'transparent' },
+  option: { ...shadow, backgroundColor: '#fff', padding: 15, borderRadius: 16, marginBottom: 10, borderWidth: 2, borderColor: 'transparent' },
   optionRight: { backgroundColor: '#dcfce7', borderColor: '#16a34a' },
   optionWrong: { backgroundColor: '#fee2e2', borderColor: '#dc2626' },
   optionText: { fontSize: 16 },
   explain: { marginVertical: 10, fontSize: 15, lineHeight: 22 },
-  primary: { backgroundColor: '#4f46e5', padding: 14, borderRadius: 8, alignItems: 'center', marginTop: 6 },
+  primary: { backgroundColor: colors.primary, padding: 15, borderRadius: 16, alignItems: 'center', marginTop: 6 },
   primaryText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
   resultBox: { alignItems: 'center', paddingVertical: 30 },
   resultTitle: { fontSize: 20, fontWeight: 'bold' },
-  resultScore: { fontSize: 48, fontWeight: 'bold', color: '#4f46e5', marginVertical: 16 },
+  resultScore: { fontSize: 48, fontWeight: 'bold', color: colors.primary, marginVertical: 16 },
   newSet: { marginTop: 28, alignItems: 'center', padding: 12 },
   newSetText: { color: '#6b7280' },
 });
