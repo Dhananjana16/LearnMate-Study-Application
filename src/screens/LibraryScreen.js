@@ -5,6 +5,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { getSubjects, getFiles, FOLDERS } from '../storage';
 import { colors, shadow, subjectTint, subjectIcon } from '../theme';
 import { mascots } from '../images';
+import { Blobs } from '../Decor';
 
 export default function LibraryScreen({ navigation }) {
   const [rows, setRows] = useState(null);
@@ -26,11 +27,20 @@ export default function LibraryScreen({ navigation }) {
 
   return (
     <View style={s.container}>
-      <Text style={s.title}>Library</Text>
+      <Blobs />
+      <View style={s.topRow}>
+        <View>
+          <Text style={s.title}>Library</Text>
+          <Text style={s.subtitle}>
+            {rows ? `${rows.length} subject${rows.length === 1 ? '' : 's'}` : ' '}
+          </Text>
+        </View>
+      </View>
       <FlatList
         data={rows || []}
         keyExtractor={(r) => r.sub.id}
         contentContainerStyle={{ paddingBottom: 16 }}
+        showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           rows ? (
             <View style={s.empty}>
@@ -65,9 +75,11 @@ export default function LibraryScreen({ navigation }) {
 
 const s = StyleSheet.create({
   container: { flex: 1, padding: 16 },
-  title: { fontSize: 28, fontWeight: '800', color: colors.text, marginBottom: 16 },
-  row: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.card, borderRadius: 18, padding: 14, marginBottom: 12 },
-  icon: { width: 52, height: 52, borderRadius: 16, alignItems: 'center', justifyContent: 'center', marginRight: 14 },
+  topRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
+  title: { fontSize: 30, fontWeight: '800', color: colors.text },
+  subtitle: { fontSize: 13, color: colors.sub, marginTop: 2, fontWeight: '600' },
+  row: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.card, borderRadius: 22, padding: 14, marginBottom: 12 },
+  icon: { width: 52, height: 52, borderRadius: 18, alignItems: 'center', justifyContent: 'center', marginRight: 14 },
   name: { fontSize: 17, fontWeight: '700', color: colors.text },
   sub: { color: colors.sub, marginTop: 2 },
   empty: { alignItems: 'center', marginTop: 40 },

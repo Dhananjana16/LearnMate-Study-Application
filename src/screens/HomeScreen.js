@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { getSubjects, saveSubjects } from '../storage';
 import { getDailySeconds } from '../timeStore';
+import { getTodos } from '../todoStore';
 import { colors, shadow, subjectTint } from '../theme';
 import { mascots } from '../images';
 
@@ -26,6 +27,7 @@ export default function HomeScreen({ navigation, onSeeAll }) {
   const { width } = useWindowDimensions();
   const [subjects, setSubjects] = useState([]);
   const [days, setDays] = useState([]);
+  const [todoInfo, setTodoInfo] = useState({ left: 0, total: 0 });
   const [adding, setAdding] = useState(false);
   const [name, setName] = useState('');
 
@@ -33,6 +35,7 @@ export default function HomeScreen({ navigation, onSeeAll }) {
     useCallback(() => {
       getSubjects().then(setSubjects);
       getDailySeconds(7).then(setDays);
+      getTodos().then((l) => setTodoInfo({ left: l.filter((x) => !x.done).length, total: l.length }));
     }, [])
   );
 
@@ -117,6 +120,19 @@ export default function HomeScreen({ navigation, onSeeAll }) {
           </View>
         </View>
 
+        <TouchableOpacity style={[s.todoCard, shadow]} onPress={() => navigation.navigate('Todo')} activeOpacity={0.85}>
+          <View style={s.todoIcon}>
+            <Ionicons name="checkbox-outline" size={22} color={colors.primary} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={s.todoTitle}>To-do list</Text>
+            <Text style={s.todoSub}>
+              {todoInfo.total === 0 ? 'Add your first task' : todoInfo.left === 0 ? 'All done 🎉' : `${todoInfo.left} task${todoInfo.left === 1 ? '' : 's'} left`}
+            </Text>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color={colors.sub} />
+        </TouchableOpacity>
+
         <View style={s.sectionRow}>
           <Text style={s.section}>Subjects</Text>
           <TouchableOpacity onPress={onSeeAll}>
@@ -147,12 +163,6 @@ export default function HomeScreen({ navigation, onSeeAll }) {
         </View>
         {subjects.length > 0 && <Text style={s.hint}>Long-press a subject to delete it.</Text>}
 
-        <View style={s.bannerWrap}>
-          <Image source={mascots.bearCut} style={s.bear} resizeMode="contain" />
-          <View style={s.banner}>
-            <Text style={s.bannerText}>Small steps...{'\n'}Big results! 🧡</Text>
-          </View>
-        </View>
       </ScrollView>
 
       <Modal visible={adding} transparent animationType="fade" onRequestClose={() => setAdding(false)}>
@@ -205,6 +215,10 @@ const s = StyleSheet.create({
   barCol: { alignItems: 'center', marginLeft: 6 },
   bar: { width: 9, borderRadius: 5 },
   barLabel: { fontSize: 9, color: colors.sub, marginTop: 4 },
+  todoCard: { backgroundColor: '#fff', borderRadius: 20, padding: 14, marginTop: 14, flexDirection: 'row', alignItems: 'center' },
+  todoIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#E3EDFF', alignItems: 'center', justifyContent: 'center', marginRight: 12 },
+  todoTitle: { fontSize: 16, fontWeight: '800', color: colors.text },
+  todoSub: { fontSize: 12, color: colors.sub, marginTop: 2 },
   sectionRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 24, marginBottom: 12 },
   section: { fontSize: 22, fontWeight: '800', color: colors.text },
   seeAll: { color: colors.text, fontWeight: '700', fontSize: 13 },
