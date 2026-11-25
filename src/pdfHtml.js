@@ -7,7 +7,7 @@ const esc = (str) =>
     .replace(/\u2028/g, '\\u2028')
     .replace(/\u2029/g, '\\u2029');
 
-export function buildPdfHtml(base64) {
+export function buildPdfHtml(base64, options = {}) {
   return `<!DOCTYPE html>
 <html>
 <head>
@@ -343,6 +343,7 @@ export function buildPdfHtml(base64) {
   var LIB = ${esc(PDFJS_LIB)};
   var WORKER = ${esc(PDFJS_WORKER)};
   var B64 = ${esc(base64)};
+  var TEXT_ONLY = ${options.textOnly ? 'true' : 'false'};
   (function () {
     try {
       var s = document.createElement('script');
@@ -358,6 +359,7 @@ export function buildPdfHtml(base64) {
 
       lib.getDocument({ data: bytes }).promise.then(async function (pdf) {
         window.__pdf = pdf;
+        if (TEXT_ONLY) { post({ type: 'done', pages: pdf.numPages }); return; }
         var status = document.getElementById('status');
         var holder = document.getElementById('pages');
         var width = document.documentElement.clientWidth - 16;

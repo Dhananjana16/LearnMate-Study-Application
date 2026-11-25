@@ -76,7 +76,7 @@ function errorText(data, status) {
 }
 
 // ----- Claude (paid key) -----
-async function generateWithClaude(text, apiKey) {
+async function callClaude(prompt, apiKey) {
   const res = await fetch(CLAUDE_URL, {
     method: 'POST',
     headers: {
@@ -87,7 +87,7 @@ async function generateWithClaude(text, apiKey) {
     body: JSON.stringify({
       model: CLAUDE_MODEL,
       max_tokens: 8000,
-      messages: [{ role: 'user', content: buildPrompt(text) }],
+      messages: [{ role: 'user', content: prompt }],
     }),
   });
   const data = await readJson(res);
@@ -95,11 +95,10 @@ async function generateWithClaude(text, apiKey) {
     if (res.status === 401) throw new Error('The AI key is not valid. Check it in Settings.');
     throw new Error(errorText(data, res.status));
   }
-  const reply = ((data && data.content) || [])
+  return ((data && data.content) || [])
     .filter((b) => b.type === 'text')
     .map((b) => b.text)
     .join('');
-  return parseStudySet(reply);
 }
 
 // ----- Gemini (free key) -----
@@ -125,7 +124,7 @@ export function pickGeminiModels(list) {
   return candidates.map((c) => c.name);
 }
 
-async function generateWithGemini(text, apiKey) {
+async function callGemini(prompt, apiKey) {
   const headers = { 'content-type': 'application/json', 'x-goog-api-key': apiKey };
 
   const listRes = await fetch(`${GEMINI_BASE}/models?pageSize=200`, { headers });
@@ -149,7 +148,7 @@ async function generateWithGemini(text, apiKey) {
         method: 'POST',
         headers,
         body: JSON.stringify({
-          contents: [{ parts: [{ text: buildPrompt(text) }] }],
+          contents: [{ parts: [{ text: prompt }] }],
           generationConfig: { responseMimeType: 'application/json', maxOutputTokens: 8000 },
         }),
       });
@@ -157,8 +156,7 @@ async function generateWithGemini(text, apiKey) {
       if (res.ok) {
         const parts =
           (data && data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) || [];
-        const reply = parts.filter((p) => !p.thought && typeof p.text === 'string').map((p) => p.text).join('');
-        return parseStudySet(reply);
+        return parts.filter((p) => !p.thought && typeof p.text === 'string').map((p) => p.text).join('');
       }
       lastError = errorText(data, res.status);
       lastStatus = res.status;
@@ -178,8 +176,64 @@ async function generateWithGemini(text, apiKey) {
   throw new Error(lastError);
 }
 
-export async function generateStudySet(text, apiKey) {
+async function callAI(prompt, apiKey) {
   const key = (apiKey || '').trim();
-  if (key.startsWith('sk-ant')) return generateWithClaude(text, key);
-  return generateWithGemini(text, key);
+  if (key.startsWith('sk-ant')) return callClaude(prompt, key);
+  return callGemini(prompt, key);
+}
+
+export async function generateStudySet(text, apiKey) {
+  return parseStudySet(await callAI(buildPrompt(text), apiKey));
+}
+
+// ----- questions in the style of past papers -----
+function buildPaperPrompt(notes, papers) {
+  const paperText = papers.map((p, i) => `--- Past paper ${i + 1} (${p.name}) ---\n${p.text}`).join('\n\n');
+  return `You are helping a university student prepare for exams.
+
+Below are PAST PAPERS and the student's STUDY NOTES for one subject (the notes come from several files).
+Write a NEW model paper about the content of the STUDY NOTES, in the same style as the PAST PAPERS: the same question types, wording, command words (such as "Explain", "Discuss", "Identify"), difficulty and typical marks. Do not copy any past-paper question. Use only facts that appear in the notes for the answers.
+Write in the same language as the past papers.
+
+Return exactly this JSON and nothing else (no explanation, no markdown fences):
+{ "questions": [ { "question": "full question text", "type": "short answer, structured, essay, mcq or calculation", "marks": 5, "answer": "a model answer", "points": ["key marking point", "another marking point"] } ] }
+
+Rules:
+- 10 questions, ordered from easier to harder, like a real paper.
+- Spread the questions across the different topics found in the notes.
+- If the past papers show marks, use similar marks. Otherwise "marks" may be null.
+- If a question is multiple choice, put the options inside the question text and name the correct option in the answer.
+- "points" lists what a marker would look for.
+
+PAST PAPERS:
+"""
+${paperText}
+"""
+
+STUDY NOTES:
+"""
+${notes}
+"""`;
+}
+
+export function parsePaperSet(reply) {
+  const start = reply.indexOf('{');
+  const end = reply.lastIndexOf('}');
+  if (start < 0 || end <= start) throw new Error('The AI reply was not in the expected format. Try again.');
+  const data = JSON.parse(reply.slice(start, end + 1));
+  const questions = (Array.isArray(data.questions) ? data.questions : [])
+    .filter((q) => q && typeof q.question === 'string' && q.question.trim())
+    .map((q) => ({
+      question: q.question.trim(),
+      type: typeof q.type === 'string' ? q.type.trim() : '',
+      marks: Number.isFinite(q.marks) ? q.marks : null,
+      answer: typeof q.answer === 'string' ? q.answer.trim() : '',
+      points: Array.isArray(q.points) ? q.points.filter((x) => typeof x === 'string' && x.trim()).map((x) => x.trim()) : [],
+    }));
+  if (!questions.length) throw new Error('The AI did not return any questions. Try again.');
+  return { questions, createdAt: Date.now() };
+}
+
+export async function generatePaperQuestions(notes, papers, apiKey) {
+  return parsePaperSet(await callAI(buildPaperPrompt(notes, papers), apiKey));
 }

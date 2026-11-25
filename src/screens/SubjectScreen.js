@@ -8,8 +8,7 @@ import { colors, shadow, tints, subjectTint, subjectIcon } from '../theme';
 const FOLDER_STYLE = {
   Notes: { icon: 'document-text', tint: tints[0] },
   'Past Papers': { icon: 'documents', tint: tints[1] },
-  'Revision Notes': { icon: 'repeat', tint: tints[2] },
-  'Quick Notes': { icon: 'flash', tint: tints[3] },
+  'Quick Notes': { icon: 'flash', tint: tints[2] },
 };
 
 export default function SubjectScreen({ route, navigation }) {

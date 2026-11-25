@@ -3,7 +3,7 @@ import { File, Directory, Paths } from 'expo-file-system';
 
 const SUBJECTS_KEY = 'subjects';
 const filesKey = (subjectId, folder) => `files_${subjectId}_${folder}`;
-export const FOLDERS = ['Notes', 'Past Papers', 'Revision Notes', 'Quick Notes'];
+export const FOLDERS = ['Notes', 'Past Papers', 'Quick Notes'];
 
 export async function getSubjects() {
   const v = await AsyncStorage.getItem(SUBJECTS_KEY);

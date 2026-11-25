@@ -9,6 +9,7 @@ import SettingsScreen from './src/screens/SettingsScreen';
 import NotesScreen from './src/screens/NotesScreen';
 import NoteEditorScreen from './src/screens/NoteEditorScreen';
 import StudyScreen from './src/screens/StudyScreen';
+import PaperQuestionsScreen from './src/screens/PaperQuestionsScreen';
 import { colors } from './src/theme';
 
 const Stack = createNativeStackNavigator();
@@ -32,6 +33,7 @@ export default function App() {
         <Stack.Screen name="Notes" component={NotesScreen} options={{ title: 'Notes' }} />
         <Stack.Screen name="NoteEditor" component={NoteEditorScreen} options={{ title: 'Note' }} />
         <Stack.Screen name="Study" component={StudyScreen} options={{ title: 'Study' }} />
+        <Stack.Screen name="PaperQuestions" component={PaperQuestionsScreen} options={{ title: 'Model paper' }} />
         <Stack.Screen name="Settings" component={SettingsScreen} options={{ title: 'Settings' }} />
       </Stack.Navigator>
     </NavigationContainer>
