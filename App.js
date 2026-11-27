@@ -11,6 +11,7 @@ import NoteEditorScreen from './src/screens/NoteEditorScreen';
 import StudyScreen from './src/screens/StudyScreen';
 import PaperQuestionsScreen from './src/screens/PaperQuestionsScreen';
 import TodoScreen from './src/screens/TodoScreen';
+import SubjectsScreen from './src/screens/SubjectsScreen';
 import { colors } from './src/theme';
 
 const Stack = createNativeStackNavigator();
@@ -36,6 +37,7 @@ export default function App() {
         <Stack.Screen name="Study" component={StudyScreen} options={{ title: 'Study' }} />
         <Stack.Screen name="PaperQuestions" component={PaperQuestionsScreen} options={{ title: 'Model paper' }} />
         <Stack.Screen name="Todo" component={TodoScreen} options={{ title: 'To-do list' }} />
+        <Stack.Screen name="AllSubjects" component={SubjectsScreen} options={{ title: 'Subjects' }} />
         <Stack.Screen name="Settings" component={SettingsScreen} options={{ title: 'Settings' }} />
       </Stack.Navigator>
     </NavigationContainer>

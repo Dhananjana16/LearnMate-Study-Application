@@ -3,14 +3,14 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import HomeScreen from './HomeScreen';
-import LibraryScreen from './LibraryScreen';
+import MotivationScreen from './MotivationScreen';
 import CalendarScreen from './CalendarScreen';
 import ProfileScreen from './ProfileScreen';
 import { colors, shadow } from '../theme';
 
 const TABS = [
   { key: 'home', label: 'Home', icon: 'home' },
-  { key: 'library', label: 'Library', icon: 'library' },
+  { key: 'motivation', label: 'Motivation', icon: 'flame' },
   { key: 'calendar', label: 'Calendar', icon: 'calendar' },
   { key: 'profile', label: 'Profile', icon: 'person' },
 ];
@@ -20,8 +20,8 @@ export default function MainTabs({ navigation }) {
   const [tab, setTab] = useState('home');
 
   let content;
-  if (tab === 'home') content = <HomeScreen navigation={navigation} onSeeAll={() => setTab('library')} />;
-  else if (tab === 'library') content = <LibraryScreen navigation={navigation} />;
+  if (tab === 'home') content = <HomeScreen navigation={navigation} onSeeAll={() => navigation.navigate('AllSubjects')} />;
+  else if (tab === 'motivation') content = <MotivationScreen />;
   else if (tab === 'calendar') content = <CalendarScreen />;
   else content = <ProfileScreen />;
 
